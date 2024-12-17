@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+
+        @font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #A4A4A7;
+            font-family: 'Pretendard-Regular';
+            z-index: -25;
+             background-image: url('back.png'); /* 배경 이미지 */
+        background-size: cover; /* 이미지를 화면 크기에 맞게 자동 조정 */
+        background-position: center center; /* 배경 이미지가 화면 중앙에 위치하도록 설정 */
+        height: 100vh; /* 화면 전체 높이를 채우기 위해 설정 */
+        }
+
+        #cursor {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            z-index: 12;
+        }
+
+        #inner-circle {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #F14A04;
+            border-radius: 50%;
+            animation: rotate 2s infinite linear;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 12;
+        }
+
+        .element {
+            position: absolute;
+            transition: transform 0.3s;
+            z-index: 10;
+        }
+
+        .leaf1 { top: -30vh; }
+        .leaf2 { bottom: -15vh; z-index: ; }
+        .leaf3 { top: -50vh; }
+        .leaf4 { bottom: -40vh; z-index: -5}
+        .leaf5 { bottom: -30vh; }
+        .leaf6 { top: -20vh; }
+
+        .new-bug {
+            position: absolute; 
+            z-index: 0;
+        }
+
+        .text-box {
+            position: absolute;
+            background-color: #EBE8E1;
+            padding: 35px 50px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 1.5s ease-out;
+            clip-path: polygon(0% 3%, 3% 0%, 6% 3%, 9% 0%, 12% 3%, 15% 0%, 100% 2%, 97% 0%, 98% 3%, 90% 0%, 97% 3%, 100% 0%, 100% 97%, 97% 100%, 94% 97%, 91% 100%, 88% 97%, 85% 100%, 3% 100%, 0% 87%, 2% 74%, 0% 71%, 1% 68%, 0% 55%);
+        }
+
+       
+
+        .rounded-box {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            z-index: 1;
+        }
+
+        .box1 { top: 3vh; right: 3vh; }
+        .box2 { top: 18vh; right: 3vh; }
+        .box3 { top: 33vh; right: 3vh; } 
+        .box4 { top: 48vh; right: 3vh; }
+
+        .clicked {
+    pointer-events: none; /* 클릭 불가 설정 */
+    /* 추가로 호버 효과를 원하지 않는 경우 아래와 같은 스타일 추가 */
+    transform: none; /* 호버 시 변형 없도록 */
+    transition: none; /* 호버 시 전환 효과 없도록 */
+}
+    </style>
+</head>
+<body>
+    <div id="cursor">
+        <div id="inner-circle"></div>
+    </div>
+   
+    <div class="text-box" id="text1">당신은 곤충 채집가입니다.</div>
+    <div class="text-box" id="text2" style="display: none;">클릭을 통해 희귀한 곤충을 채집하세요.</div>
+    <div class="rounded-box box1"></div>
+    <div class="rounded-box box2"></div>
+    <div class="rounded-box box3"></div>
+    <div class="rounded-box box4"></div>
+
+    <script>
+        const cursor = document.getElementById("cursor");
+window.onmousemove = function(e) {
+    cursor.style.left = `${e.clientX}px`;
+    cursor.style.top = `${e.clientY}px`;
+}
+
+const leafImages = ['leaf1.png', 'leaf2.png', 'leaf3.png', 'leaf4.png', 'leaf5.png', 'leaf6.png']; // leaf6 추가
+const positions = {};
+const spacing = 500;
+
+leafImages.forEach((image, index) => {
+    const count = Math.floor(Math.random() * 2) + 2;
+    positions[`leaf${index + 1}`] = [];
+
+    for (let i = 0; i < count; i++) {
+        const randomOffset = (Math.random() * 400) - 100;
+        const left = (window.innerWidth / 2) - ((count - 1) * (spacing + randomOffset)) + (i * (spacing + randomOffset));
+        positions[`leaf${index + 1}`].push(left);
+    }
+});
+
+for (const [className, leftPositions] of Object.entries(positions)) {
+    leftPositions.forEach(left => {
+        const leaf = document.createElement("img");
+        leaf.src = `${className}.png`;
+        leaf.className = `element ${className}`;
+        leaf.style.left = `${left}px`;
+        const initialRotation = Math.random() * -30;
+        leaf.style.transform = `rotate(${initialRotation}deg)`;
+
+        document.body.appendChild(leaf);
+
+        let originalRotation = initialRotation;
+        leaf.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('clicked')) {
+                const randomMovement = (Math.random() - 5) * 50;
+                const randomRotation = Math.random() * 30 - 15;
+                leaf.style.transform = `rotate(${originalRotation + randomRotation}deg) translateX(${randomMovement}px)`;
+            }
+        });
+
+        leaf.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('clicked')) {
+                leaf.style.transform = `rotate(${originalRotation}deg) translateX(0)`;
+            }
+        });
+    });
+}
+
+let lastMouseX = 0;
+let lastMouseY = 0;
+let bugCooldown = false;
+
+window.onmousemove = function(e) {
+    cursor.style.left = `${e.clientX}px`;
+    cursor.style.top = `${e.clientY}px`;
+
+    const mouseSpeed = Math.abs(e.clientX - lastMouseX) + Math.abs(e.clientY - lastMouseY);
+
+    if (mouseSpeed > 20 && !bugCooldown) {
+        createBug(e.clientX, e.clientY);
+        bugCooldown = true;
+        setTimeout(() => {
+            bugCooldown = false;
+        }, 500);
+    }
+
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+}
+
+function createBug(x, y) {
+    const bug = document.createElement("div");
+    bug.className = "bug";
+    bug.style.left = `${x}px`;
+    bug.style.top = `${y}px`;
+    document.body.appendChild(bug);
+
+    bug.animate([
+        { transform: 'translate(0, 0)', opacity: 1 },
+        { transform: `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`, opacity: 0 }
+    ], {
+        duration: 3000,
+        fill: 'forwards'
+    });
+
+    setTimeout(() => {
+        bug.remove();
+    }, 3000);
+}
+
+function showText() {
+    const text1 = document.getElementById("text1");
+    const text2 = document.getElementById("text2");
+
+    text1.style.opacity = 1;
+    setTimeout(() => {
+        text1.style.opacity = 0;
+        text2.style.display = "block";
+        text2.style.opacity = 1;
+    }, 1500);
+
+    setTimeout(() => {
+        text2.style.opacity = 0;
+        text2.style.display = "none";
+    }, 3000);
+}
+
+showText();
+
+const bugImages = ['bug1.png', 'bug2.png', 'bug3.png', 'bug4.png'];
+const bugCount = 4;
+let currentBugIndex = 0;
+
+window.onload = function () {
+    createBugs();
+}
+
+function createBugs() {
+    for (let i = 0; i < bugCount; i++) {
+        const bug = document.createElement("div");
+        bug.className = "new-bug";
+        const randomImage = bugImages[Math.floor(Math.random() * bugImages.length)];
+        bug.style.backgroundImage = `url(${randomImage})`;
+        bug.style.backgroundSize = 'contain';
+        bug.style.backgroundRepeat = 'no-repeat';
+        bug.style.width = '20vh';
+        bug.style.height = '8vh';
+
+        const randomX = Math.random() * window.innerWidth;
+        const randomY = Math.random() * window.innerHeight;
+        bug.style.left = `${randomX}px`;
+        bug.style.top = `${randomY}px`;
+
+        const randomRotation = Math.random() * 360;
+        bug.style.transform = `rotate(${randomRotation}deg)`;
+
+        document.body.appendChild(bug);
+
+        bug.addEventListener("click", function () {
+            if (!this.dataset.boxed) {
+                const boxPositions = [
+                    { top: '5vh', left: 'calc(100% - 12vh)' },
+                    { top: '20vh', left: 'calc(100% - 12vh)' },
+                    { top: '35vh', left: 'calc(100% - 12vh)' },
+                    { top: '50vh', left: 'calc(100% - 12vh)' }
+                ];
+
+                if (currentBugIndex < boxPositions.length) {
+                    this.style.pointerEvents = 'none';
+                    this.style.transition = "top 0.5s, left 0.5s, transform 0.5s";
+                    this.style.top = boxPositions[currentBugIndex].top;
+                    this.style.left = boxPositions[currentBugIndex].left;
+                    this.style.zIndex = 20;
+                    this.style.transform = 'rotate(0deg)';
+                    this.dataset.boxed = "true";
+                    currentBugIndex++;
+
+                    if (currentBugIndex === boxPositions.length) {
+                        setTimeout(() => {
+                            alert("이 시대의 파브르! 축하합니다");
+                        }, 500);
+                    }
+                }
+            }
+        });
+    }
+}
+
+const elements = document.querySelectorAll('.element');
+elements.forEach(element => {
+    element.addEventListener('mouseenter', function () {
+        setTimeout(() => {
+            const bugs = document.querySelectorAll('.new-bug:not([data-boxed="true"])');
+            bugs.forEach(bug => {
+                const elementRect = element.getBoundingClientRect();
+                const bugRect = bug.getBoundingClientRect();
+
+                if (
+                    elementRect.left <= bugRect.left + bugRect.width &&
+                    elementRect.left + elementRect.width >= bugRect.left &&
+                    elementRect.top <= bugRect.top + bugRect.height &&
+                    elementRect.top + elementRect.height >= bugRect.top
+                ) {
+                    if (!bug.dataset.boxed) {
+                        const randomRotation = Math.random() * 360;
+                        const randomX = Math.random() * (window.innerWidth - 100);
+                        const randomY = Math.random() * (window.innerHeight - 100);
+
+                        bug.style.transition = "top 1s, left 1s, transform 1s";
+                        bug.style.top = `${randomY}px`;
+                        bug.style.left = `${randomX}px`;
+                        bug.style.transform = `rotate(${randomRotation}deg)`;
+                    }
+                }
+            });
+        }, 1000);
+    });
+});
+
+function checkOverlap(bug) {
+    let overlap = false;
+    const bugRect = bug.getBoundingClientRect();
+
+    document.querySelectorAll('.element').forEach(image => {
+        const imageRect = image.getBoundingClientRect();
+        if (
+            bugRect.left < imageRect.right &&
+            bugRect.right > imageRect.left &&
+            bugRect.top < imageRect.bottom &&
+            bugRect.bottom > imageRect.top
+        ) {
+            overlap = true;
+        }
+    });
+
+    return overlap;
+}
+
+
+
+    </script>
+</body>
+</html>
